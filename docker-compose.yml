@@ -1,0 +1,14 @@
+version: '3.2'
+
+services:
+  node:
+    build: .docker
+    container_name: mt-core
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=manny-talk:*
+    working_dir: /app/packages/manny-talk-core
+    # This docker-compose command watches the manny-talk-core repo. 
+    # Use `docker-compose exec bash` to start additional terminals for other packages.
+    command: npm run watch

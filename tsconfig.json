@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES5",
+    "module": "ESNext",
+
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noImplicitThis": true
+  }
+}
