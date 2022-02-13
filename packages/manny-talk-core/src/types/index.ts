@@ -55,7 +55,7 @@ export type PluginBrainSelector = {
 export type BrainSelector = (
   brains: Record<string, Brain>,
   input: IncomingMessage
-) => Promise<BrainSelectorResult>;
+) => Promise<BrainSelectorResult | false>;
 
 export type BrainSelectorResult = {
   brain: Brain;
@@ -73,7 +73,7 @@ export type PluginListener = {
 export type IncomingMessage = {
   plugin: string;
   message: string;
-  metadata: Record<string, any>;
+  metadata?: Record<string, any>;
   sessionId?: string;
   profileId?: string;
 };

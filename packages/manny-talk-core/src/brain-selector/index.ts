@@ -8,7 +8,7 @@ import {
 } from '../types';
 import getDefaultSelector from './default';
 
-const debug = Debug('genie-router:brainSelector');
+const debug = Debug('manny-talk:core:brainSelector');
 
 /**
  * Class that enables plugins to influence which brains
@@ -18,8 +18,8 @@ const debug = Debug('genie-router:brainSelector');
  * via setBrains().
  */
 export default class BrainSelector {
-  private defaultSelector: BrainSelectorType | null = null;
-  private selectors: BrainSelectorType[];
+  private defaultSelector: BrainSelectorType;
+  private selectors: Record<string, BrainSelectorType>;
   private lastSelectedBrainsPerClient: Record<
     string,
     { time: Date; brain: Brain }
@@ -30,12 +30,10 @@ export default class BrainSelector {
     private readonly defaultBrain: string,
     private readonly brainStickiness: number // The time a brain selected for a certain client is used as the default
   ) {
-    this.selectors = [];
+    this.selectors = {};
     this.lastSelectedBrainsPerClient = {};
     this.defaultBrain = defaultBrain;
-    getDefaultSelector(this.defaultBrain).then((defaultSelector) => {
-      this.defaultSelector = defaultSelector;
-    });
+    this.defaultSelector = getDefaultSelector(this.defaultBrain);
   }
 
   /**
@@ -48,8 +46,8 @@ export default class BrainSelector {
     if (typeof selector !== 'function') {
       throw new Error('Selector is not a function.');
     }
-    debug('Adding selector %s', label);
-    this.selectors.push(selector);
+    debug('Adding selector %s in use()', label);
+    this.selectors[label] = selector;
   }
 
   /**
@@ -66,27 +64,41 @@ export default class BrainSelector {
    * @return Promise
    */
   async getBrainForInput(input: IncomingMessage): Promise<BrainSelectorResult> {
-    const promises: Promise<BrainSelectorResult>[] = [];
+    if (this.selectors === {}) {
+      return this.getDefaultSelectorResult(input);
+    }
 
-    this.selectors.forEach((selector) => {
+    const promises: Promise<BrainSelectorResult | false>[] = [];
+
+    debug(
+      'Using selectors %s for getting brain for input.',
+      Object.keys(this.selectors)
+    );
+    Object.values(this.selectors).forEach((selector) => {
       promises.push(selector(this.brains, input));
     });
 
-    if (promises.length === 0) {
-      if (this.defaultSelector === null) {
-        throw new Error('The default selector has not been initialized.');
-      }
-      return await this.defaultSelector(this.brains, input);
-    }
-
     try {
-      const brainSelectorResult = await Promise.any(promises);
+      const brainSelectorResults = await Promise.all(promises);
+      const brainSelectorResult = brainSelectorResults.find(
+        (result) => result !== false
+      );
+      if (typeof brainSelectorResult === 'undefined') {
+        debug('No selector returned a valid result.');
+        throw new Error(
+          'No selector returned a result, need to fallback to default.'
+        );
+      }
+
+      debug('Found a valid result from a selector.');
+      const castResult = brainSelectorResult as BrainSelectorResult;
+
       // Set the lastSelectedBrainsPerClient value for this client (plugin).
       this.lastSelectedBrainsPerClient[input.plugin] = {
         time: new Date(),
-        brain: brainSelectorResult.brain,
+        brain: castResult.brain,
       };
-      return brainSelectorResult;
+      return castResult;
     } catch (err) {
       // No selector took it, fallback to the last selected brain, or the default if there isn't one.
       if (this.lastSelectedBrainsPerClient[input.plugin]) {
@@ -110,11 +122,17 @@ export default class BrainSelector {
         isError(err) ? err.message : err
       );
 
-      if (this.defaultSelector === null) {
-        throw new Error('The default brain selector is not set.');
-      }
-      const defaultResult = await this.defaultSelector(this.brains, input);
-      return defaultResult;
+      return this.getDefaultSelectorResult(input);
     }
+  }
+
+  private async getDefaultSelectorResult(input: IncomingMessage) {
+    const result = await this.defaultSelector(this.brains, input);
+    if (result === false) {
+      throw new Error(
+        'No selectors found, and default selector could also not generate a result.'
+      );
+    }
+    return result;
   }
 }

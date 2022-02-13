@@ -1,10 +1,10 @@
 import Debug from 'debug';
-import { Brain } from '../types';
+import { Brain, BrainSelector, BrainSelectorResult } from '../types';
 
 const debug = Debug('manny-talk:core:brainSelector:default');
 
-const createDefaultBrain = async (defaultBrain: string) =>
-  async function (brains: Record<string, Brain>) {
+const createDefaultBrain = (defaultBrain: string): BrainSelector =>
+  async function (brains: Record<string, Brain>): Promise<BrainSelectorResult> {
     if (brains[defaultBrain]) {
       debug('Resolving brain resolution to %s', defaultBrain);
       return { brain: brains[defaultBrain] };
@@ -14,8 +14,8 @@ const createDefaultBrain = async (defaultBrain: string) =>
     throw new Error('Default brain not found in list of brains');
   };
 
-export default async function getDefaultBrainSelector(
+export default function getDefaultBrainSelector(
   configuredDefaultBrain: string
-) {
+): BrainSelector {
   return createDefaultBrain(configuredDefaultBrain);
 }

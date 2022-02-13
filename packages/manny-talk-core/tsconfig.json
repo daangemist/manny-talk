@@ -12,7 +12,9 @@
     "forceConsistentCasingInFileNames": true,
 
     "resolveJsonModule": true,
-    "declaration": true
+    "declaration": true,
+
+    "types": ["@types/jest"]
   },
   "include": ["src/**/*"],
   "exclude": ["./tests", "./build"]
