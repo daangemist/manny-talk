@@ -277,7 +277,9 @@ export class Loader {
    */
   private async npmInstall(): Promise<void> {
     const cwd = process.cwd();
+    debug('Changing npm install folder to %s', this.location);
     process.chdir(this.location);
+    debug('Installing modules.');
     await npmUtils.install({
       name: '',
       flags: ['--quiet', '--production'],
@@ -287,5 +289,3 @@ export class Loader {
     process.chdir(cwd);
   }
 }
-
-module.exports = Loader;

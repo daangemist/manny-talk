@@ -28,7 +28,6 @@ export type Plugin = () => Promise<StartedPlugin>;
 
 export type StartedPlugin = {
   // TODO: add types here.
-  setRouter?: any;
   brain?: PluginBrain;
   brainSelector?: PluginBrainSelector;
   client?: PluginClient;

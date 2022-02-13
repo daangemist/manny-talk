@@ -2,12 +2,5 @@
   "name": "manny-talk",
   "workspaces": [
     "packages/manny-talk-core"
-  ],
-  "devDependencies": {
-    "@types/express": "^4.17.13"
-  },
-  "dependencies": {
-    "npm-utils": "^2.0.3",
-    "superplug": "^1.0.0"
-  }
+  ]
 }
