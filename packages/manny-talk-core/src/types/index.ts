@@ -1,3 +1,5 @@
+import EventEmitter from 'events';
+
 export const isError = (tbd?: unknown): tbd is Error =>
   typeof tbd === 'object' &&
   // @ts-expect-error When checking message is an attribute of object({}) ts does not allow to check if .message exists.
@@ -8,7 +10,7 @@ export const isErrorWithCode = (tbd?: unknown): tbd is ErrorWithCode =>
   isError(tbd) && typeof tbd.code !== 'undefined';
 
 export type Config = {
-  plugins: Record<string, Record<string, any>>;
+  plugins: Record<string, PluginConfig>;
   pluginStore?: {
     location?: string;
   };
@@ -24,32 +26,41 @@ export interface ErrorWithCode extends Error {
   code: string;
 }
 
-export type Plugin = () => Promise<StartedPlugin>;
+export type Plugin = () => Promise<LoadedPlugin>;
 
-export type StartedPlugin = {
-  // TODO: add types here.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PluginConfig = Record<string, any>;
+
+export type LoadedPlugin = {
   brain?: PluginBrain;
   brainSelector?: PluginBrainSelector;
   client?: PluginClient;
-  http: PluginHttp;
-  listener: PluginListener;
+  http?: PluginHttp;
+  listener?: PluginListener;
 };
 
 export type PluginBrain = {
-  start: any;
+  start: (config: PluginConfig) => Promise<Brain>;
 };
 
 export type Brain = {
-  process: any;
+  process: (input: IncomingMessage) => Promise<OutgoingMessage>;
 };
 
 export type PluginClient = {
-  start: any;
+  start: (config: PluginConfig, clientStart: ClientStart) => Promise<Client>;
 };
-export type Client = any;
+export type Client = {
+  speak: (message: OutgoingMessage) => Promise<void>;
+};
+export type ClientStart = {
+  heard: (message: IncomingMessage) => Promise<void>;
+  // Clients should use speak even when sending their own output, because of event listeners which also should be invoked.
+  speak: (reply: OutgoingMessage) => Promise<void>;
+};
 
 export type PluginBrainSelector = {
-  start: any;
+  start: (config: PluginConfig) => Promise<BrainSelector>;
 };
 
 export type BrainSelector = (
@@ -62,24 +73,32 @@ export type BrainSelectorResult = {
   updatedInput?: IncomingMessage;
 };
 
+// TODO fix this type when we get to enabling HTTP
 export type PluginHttp = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   start: any;
 };
 
 export type PluginListener = {
-  start: any;
+  start: (config: PluginConfig, eventEmitter: EventEmitter) => Promise<void>;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Metadata = Record<string, any>;
 
 export type IncomingMessage = {
   plugin: string;
   message: string;
-  metadata?: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata?: Metadata;
   sessionId?: string;
   profileId?: string;
 };
 
-export type OutgoingMessage = any;
-
-export type SpeakCallback = (
-  outgoingMessage: OutgoingMessage
-) => Promise<void> | void;
+export type OutgoingMessage = {
+  plugin: string;
+  message: string;
+  metadata?: Metadata;
+  sessionId?: string;
+  profileId?: string;
+};

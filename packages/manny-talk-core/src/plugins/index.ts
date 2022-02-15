@@ -13,15 +13,17 @@ import { EventEmitter } from 'bunyan';
 import {
   Brain,
   Client,
+  ClientStart,
   Config,
   isErrorWithCode,
-  StartedPlugin,
+  PluginHttp,
+  LoadedPlugin,
 } from '../types';
 
 const debug = Debug('manny-talk:core:plugins');
 
 export class Loader {
-  private plugins: Record<string, StartedPlugin> = {};
+  private plugins: Record<string, LoadedPlugin> = {};
   private clients: Record<string, Client> = {};
   private httpEnabled = false;
   private location = ''; //value is initialized in startPlugins()
@@ -29,7 +31,10 @@ export class Loader {
 
   constructor(
     private config: Config,
-    private clientStartObjectGenerator: any,
+    private clientStartObjectGenerator: (
+      pluginName: string,
+      plugin: LoadedPlugin
+    ) => ClientStart,
     private brainSelector: BrainSelector,
     private eventEmitter: EventEmitter
   ) {}
@@ -43,7 +48,12 @@ export class Loader {
    * Returns a promise that resolves when all plugins are loaded.
    * @return {Promise}
    */
-  public async startPlugins(): Promise<void> {
+  public async startPlugins(usePluginStore: boolean): Promise<void> {
+    if (!usePluginStore) {
+      await this.startFoundPlugins();
+      return;
+    }
+
     try {
       this.location = await this.getPluginStoreLocation();
       await stat(path.join(this.location, 'node_modules'));
@@ -169,6 +179,10 @@ export class Loader {
     return express;
   }
 
+  public addPlugin(name: string, plugin: LoadedPlugin) {
+    this.plugins[name] = plugin;
+  }
+
   private async startFoundPlugins() {
     const plugins = Object.keys(this.plugins);
     debug('Found plugins: ', plugins);
@@ -205,11 +219,9 @@ export class Loader {
       }
       if (plugin.brainSelector) {
         promises.push(
-          plugin.brainSelector
-            .start(pluginConfig)
-            .then((brainSelector: BrainSelector) => {
-              this.brainSelector.use(pluginName, brainSelector);
-            })
+          plugin.brainSelector.start(pluginConfig).then((brainSelector) => {
+            this.brainSelector.use(pluginName, brainSelector);
+          })
         );
       }
       if (plugin.http) {
@@ -222,7 +234,7 @@ export class Loader {
           promises.push(
             http().then((app) =>
               this.getExpress().then((express) =>
-                this.plugins[pluginName].http.start(pluginConfig, app, express)
+                (plugin.http as PluginHttp).start(pluginConfig, app, express)
               )
             )
           );
@@ -254,11 +266,9 @@ export class Loader {
         readFromObject(this.config, `plugins.${foundPlugin.name}`, {}) !==
         undefined
       ) {
-        const p = foundPlugin
-          .getPlugin()
-          .then((pluginModule: StartedPlugin) => {
-            this.plugins[foundPlugin.name] = pluginModule;
-          });
+        const p = foundPlugin.getPlugin().then((pluginModule: LoadedPlugin) => {
+          this.plugins[foundPlugin.name] = pluginModule;
+        });
         promises.push(p);
       } else {
         debug(

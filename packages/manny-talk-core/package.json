@@ -13,7 +13,7 @@
   "bin": {
     "manny-talk": "bin/manny-talk"
   },
-  "types": "./build/index.d.ts",
+  "types": "build/index.d.ts",
   "keywords": [
     "manny",
     "manny-talk",

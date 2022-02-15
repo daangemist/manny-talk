@@ -5,12 +5,13 @@ import http from './http';
 import BrainSelector from './brain-selector';
 import { Loader as PluginLoader } from './plugins';
 import {
+  ClientStart,
   Config,
   IncomingMessage,
+  LoadedPlugin,
   OutgoingMessage,
-  SpeakCallback,
 } from './types';
-import { INPUT_HEARD } from './constants/events';
+import { INPUT_HEARD, OUTPUT_REPLY } from './constants/events';
 
 const debug = Debug('manny-talk:core');
 
@@ -35,64 +36,68 @@ export class MannyTalk {
     );
   }
 
-  public async start() {
+  public addPlugin(name: string, plugin: LoadedPlugin): MannyTalk {
+    this.pluginLoader.addPlugin(name, plugin);
+    return this;
+  }
+
+  public async start(usePluginStore = false) {
     try {
       await this.startHttp();
       await this.pluginLoader.setHttpEnabled(this.httpEnabled);
-      await this.pluginLoader.startPlugins();
+      await this.pluginLoader.startPlugins(usePluginStore);
     } catch (err) {
       console.error('Error initializing', err); // eslint-disable-line no-console
       process.exit(10);
     }
   }
 
-  private getClientStartObjects(clientPluginName: string) {
-    return {
-      // TODO create an object model
-      heard: (message: IncomingMessage) => {
-        this.processHeardInput(message, (replyMessage: OutgoingMessage) => {
-          // We cannot use this function directly, because the object this.clients[clientPluginName]
-          // is not set yet when we create this startObject.
-          this.eventEmitter.emit(
-            'output.reply',
-            clientPluginName,
-            replyMessage
-          );
-          this.pluginLoader.getClients()[clientPluginName].speak(replyMessage);
-        });
-      },
-    };
+  public async speak(
+    plugin: string,
+    replyMessage: OutgoingMessage
+  ): Promise<void> {
+    this.eventEmitter.emit(OUTPUT_REPLY, plugin, replyMessage);
+    await this.pluginLoader.getClients()[plugin].speak(replyMessage);
   }
 
-  private async processHeardInput(
-    input: IncomingMessage,
-    speakCallback: SpeakCallback
-  ) {
-    this.eventEmitter.emit(INPUT_HEARD, input.plugin, input.message);
+  private getClientStartObjects(clientPluginName: string) {
+    const clientStart: ClientStart = {
+      heard: async (message: IncomingMessage) => {
+        const reply = await this.processHeardInput(message);
+
+        await this.speak(clientPluginName, reply);
+      },
+      speak: (reply: OutgoingMessage) => this.speak(clientPluginName, reply),
+    };
+    return clientStart;
+  }
+
+  private async processHeardInput(input: IncomingMessage) {
+    this.eventEmitter.emit(INPUT_HEARD, input);
 
     try {
       const selectedInfo = await this.brainSelector.getBrainForInput(input);
 
-      const { brain } = selectedInfo;
       let updatedInput = input;
       if (selectedInfo.updatedInput) {
-        // the brain overrides the input
+        debug('Brain overrides the input.');
         updatedInput = selectedInfo.updatedInput;
       }
 
-      const output = await brain.process(updatedInput);
+      const output = await selectedInfo.brain.process(updatedInput);
 
-      const outputClone = Object.assign({}, output);
+      const outputClone = { ...output }; // A shallow copy
       outputClone.metadata = updatedInput.metadata;
-      outputClone.sessionId = updatedInput.sessionId
-        ? updatedInput.sessionId
-        : null;
-      outputClone.profileId = updatedInput.profileId
-        ? updatedInput.profileId
-        : null;
-      await speakCallback(outputClone);
+      outputClone.sessionId = updatedInput.sessionId;
+      outputClone.profileId = updatedInput.profileId;
+
+      return outputClone;
     } catch (err) {
       debug('Unable to process input %s: %s', JSON.stringify(input), `${err}`);
+      return {
+        message: 'Could not process input. Try again.',
+        plugin: 'manny-talk-core',
+      };
     }
   }
 

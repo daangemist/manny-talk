@@ -42,7 +42,7 @@ export default class BrainSelector {
    * brain. If the selector also manipulates the received input message, the altered
    * version of the input should be returned in the input attribute.
    */
-  use(label: string, selector: BrainSelector) {
+  use(label: string, selector: BrainSelectorType) {
     if (typeof selector !== 'function') {
       throw new Error('Selector is not a function.');
     }

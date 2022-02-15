@@ -1,3 +1,10 @@
 export { MannyTalk } from './manny-talk';
 
-export { Plugin } from './types';
+export {
+  Plugin,
+  Config,
+  PluginConfig,
+  ClientStart,
+  IncomingMessage,
+  OutgoingMessage,
+} from './types';

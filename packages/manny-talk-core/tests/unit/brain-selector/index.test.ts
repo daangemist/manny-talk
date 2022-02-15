@@ -1,12 +1,5 @@
 import BrainSelector from '../../../src/brain-selector';
-import { Brain } from '../../../src/types';
-
-jest.useFakeTimers();
-
-/**
- * TODO replace the as unknown notations and casts with actual Jest generics,
- * so that it is more readable.
- */
+import { Brain, BrainSelector as BrainSelectorFn } from '../../../src/types';
 
 function setupBrainSelector(stickyness = 120): BrainSelector {
   const brainSelector = new BrainSelector('default', stickyness);
@@ -31,7 +24,7 @@ describe('getBrainForInput', () => {
   it('should use a sticky brain if there is one for the client', async () => {
     const stickyBrain: Brain = { process: jest.fn() };
 
-    const stickySelector = jest.fn();
+    const stickySelector = jest.fn() as jest.MockedFunction<BrainSelectorFn>;
     stickySelector.mockResolvedValue({ brain: stickyBrain });
 
     // Make sure that one the second invocation sticky brain is not selected by this selector.
@@ -41,7 +34,7 @@ describe('getBrainForInput', () => {
 
     const brainSelector = setupBrainSelector();
 
-    brainSelector.use('sticky', stickySelector as unknown as BrainSelector);
+    brainSelector.use('sticky', stickySelector);
 
     const defaultBrain: Brain = { process: jest.fn() };
     brainSelector.setBrains({ default: defaultBrain, sticky: stickyBrain });
@@ -66,7 +59,7 @@ describe('getBrainForInput', () => {
   it('should not use a sticky brain if it is outdated', async () => {
     const stickyBrain: Brain = { process: jest.fn() };
 
-    const stickySelector = jest.fn();
+    const stickySelector = jest.fn() as jest.MockedFunction<BrainSelectorFn>;
     stickySelector.mockResolvedValueOnce({ brain: stickyBrain });
 
     // Make sure that one the second invocation sticky brain is not selected by this selector.
@@ -74,7 +67,7 @@ describe('getBrainForInput', () => {
 
     const brainSelector = setupBrainSelector(-1);
 
-    brainSelector.use('sticky', stickySelector as unknown as BrainSelector);
+    brainSelector.use('sticky', stickySelector);
 
     const defaultBrain: Brain = { process: jest.fn() };
     brainSelector.setBrains({ default: defaultBrain, sticky: stickyBrain });

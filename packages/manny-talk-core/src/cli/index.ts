@@ -4,12 +4,13 @@ import { readFile } from 'fs/promises';
 import { MannyTalk } from '../manny-talk';
 import { isError } from '../types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function startApp(config: Record<string, any>) {
   // @ts-expect-error We should have validation here to verify that we are providing MannyTalk with a correct config.
   const app = new MannyTalk(config);
 
   app
-    .start()
+    .start(true)
     .then(function () {
       console.log('Ready...');
     })
