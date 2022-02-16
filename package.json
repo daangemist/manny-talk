@@ -1,8 +1,5 @@
 {
   "name": "manny-talk",
-  "workspaces": [
-    "packages/manny-talk-core"
-  ],
   "devDependencies": {
     "@types/jest": "^27.4.0"
   }

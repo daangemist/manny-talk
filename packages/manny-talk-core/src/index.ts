@@ -4,7 +4,15 @@ export {
   Plugin,
   Config,
   PluginConfig,
-  ClientStart,
   IncomingMessage,
   OutgoingMessage,
+  Metadata,
+  ClientStart,
+  PluginBrainSelector,
+  BrainSelector,
+  BrainSelectorResult,
+  PluginListener,
+  LoadedPlugin,
 } from './types';
+
+export { events } from './constants';

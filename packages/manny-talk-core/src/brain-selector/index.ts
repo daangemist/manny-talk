@@ -5,6 +5,7 @@ import {
   BrainSelector as BrainSelectorType,
   isError,
   BrainSelectorResult,
+  IncomingMessageCore,
 } from '../types';
 import getDefaultSelector from './default';
 
@@ -63,19 +64,34 @@ export default class BrainSelector {
    * @param Object input An object with an attribute 'message' which contains the text input.
    * @return Promise
    */
-  async getBrainForInput(input: IncomingMessage): Promise<BrainSelectorResult> {
+  async getBrainForInput(
+    input: IncomingMessageCore
+  ): Promise<BrainSelectorResult> {
     if (this.selectors === {}) {
       return this.getDefaultSelectorResult(input);
     }
 
-    const promises: Promise<BrainSelectorResult | false>[] = [];
+    const promises: Promise<
+      { plugin: string; result: BrainSelectorResult } | false
+    >[] = [];
 
     debug(
       'Using selectors %s for getting brain for input.',
       Object.keys(this.selectors)
     );
-    Object.values(this.selectors).forEach((selector) => {
-      promises.push(selector(this.brains, input));
+    Object.entries(this.selectors).forEach(([plugin, selector]) => {
+      promises.push(
+        selector(this.brains, input).then((selectorResult) => {
+          if (selectorResult === false) {
+            return false;
+          }
+
+          return {
+            plugin,
+            result: selectorResult,
+          };
+        })
+      );
     });
 
     try {
@@ -90,15 +106,18 @@ export default class BrainSelector {
         );
       }
 
-      debug('Found a valid result from a selector.');
-      const castResult = brainSelectorResult as BrainSelectorResult;
+      const castResult = brainSelectorResult as {
+        plugin: string;
+        result: BrainSelectorResult;
+      };
+      debug('Found a valid result from selector %s.', castResult.plugin);
 
       // Set the lastSelectedBrainsPerClient value for this client (plugin).
       this.lastSelectedBrainsPerClient[input.plugin] = {
         time: new Date(),
-        brain: castResult.brain,
+        brain: castResult.result.brain,
       };
-      return castResult;
+      return castResult.result;
     } catch (err) {
       // No selector took it, fallback to the last selected brain, or the default if there isn't one.
       if (this.lastSelectedBrainsPerClient[input.plugin]) {
@@ -112,8 +131,11 @@ export default class BrainSelector {
           selectedInfo.time = now;
           // Re-initialize the last selected time for this brain
           this.lastSelectedBrainsPerClient[input.plugin] = selectedInfo;
-          debug('Selected brain because of its stickiness.');
-          return selectedInfo;
+          debug(
+            'Selected brain %s because of its stickiness.',
+            selectedInfo.brain
+          );
+          return { brain: selectedInfo.brain };
         }
       }
 
@@ -126,7 +148,9 @@ export default class BrainSelector {
     }
   }
 
-  private async getDefaultSelectorResult(input: IncomingMessage) {
+  private async getDefaultSelectorResult(
+    input: IncomingMessage
+  ): Promise<BrainSelectorResult> {
     const result = await this.defaultSelector(this.brains, input);
     if (result === false) {
       throw new Error(

@@ -2,6 +2,7 @@ import { SuperPlug } from 'superplug';
 import Debug from 'debug';
 import path from 'path';
 import os from 'os';
+import { EventEmitter } from 'events';
 import { Express } from 'express'; // Only import the type, express is imported async.
 import { stat, mkdir, writeFile } from 'fs/promises';
 // @ts-expect-error npm-utils has no @types/npm-utils
@@ -9,7 +10,6 @@ import npmUtils from 'npm-utils';
 import http from '../http';
 import { readFromObject } from '../utils';
 import BrainSelector from '../brain-selector';
-import { EventEmitter } from 'bunyan';
 import {
   Brain,
   Client,
@@ -68,7 +68,7 @@ export class Loader {
 
     this.superPlug = new SuperPlug({
       location: this.location,
-      packageProperty: 'mannyTextPlugin',
+      packageProperty: 'mannyTalkPlugin',
     });
     await this.loadPlugins();
     await this.startFoundPlugins();

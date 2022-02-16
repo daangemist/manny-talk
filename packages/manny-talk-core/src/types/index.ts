@@ -44,7 +44,7 @@ export type PluginBrain = {
 };
 
 export type Brain = {
-  process: (input: IncomingMessage) => Promise<OutgoingMessage>;
+  process: (input: IncomingMessageCore) => Promise<OutgoingMessage>;
 };
 
 export type PluginClient = {
@@ -70,7 +70,7 @@ export type BrainSelector = (
 
 export type BrainSelectorResult = {
   brain: Brain;
-  updatedInput?: IncomingMessage;
+  updatedInput?: IncomingMessageCore;
 };
 
 // TODO fix this type when we get to enabling HTTP
@@ -87,18 +87,23 @@ export type PluginListener = {
 export type Metadata = Record<string, any>;
 
 export type IncomingMessage = {
-  plugin: string;
   message: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Metadata;
   sessionId?: string;
   profileId?: string;
 };
 
-export type OutgoingMessage = {
+export interface IncomingMessageCore extends IncomingMessage {
   plugin: string;
+}
+
+export type OutgoingMessage = {
   message: string;
   metadata?: Metadata;
   sessionId?: string;
   profileId?: string;
 };
+
+export interface OutgoingMessageCore extends OutgoingMessage {
+  plugin: string;
+}

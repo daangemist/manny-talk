@@ -8,6 +8,7 @@ import {
   ClientStart,
   Config,
   IncomingMessage,
+  IncomingMessageCore,
   LoadedPlugin,
   OutgoingMessage,
 } from './types';
@@ -63,7 +64,10 @@ export class MannyTalk {
   private getClientStartObjects(clientPluginName: string) {
     const clientStart: ClientStart = {
       heard: async (message: IncomingMessage) => {
-        const reply = await this.processHeardInput(message);
+        const reply = await this.processHeardInput({
+          ...message,
+          plugin: clientPluginName,
+        });
 
         await this.speak(clientPluginName, reply);
       },
@@ -72,7 +76,7 @@ export class MannyTalk {
     return clientStart;
   }
 
-  private async processHeardInput(input: IncomingMessage) {
+  private async processHeardInput(input: IncomingMessageCore) {
     this.eventEmitter.emit(INPUT_HEARD, input);
 
     try {
@@ -84,7 +88,10 @@ export class MannyTalk {
         updatedInput = selectedInfo.updatedInput;
       }
 
-      const output = await selectedInfo.brain.process(updatedInput);
+      const output = {
+        ...(await selectedInfo.brain.process(updatedInput)),
+        plugin: input.plugin,
+      };
 
       const outputClone = { ...output }; // A shallow copy
       outputClone.metadata = updatedInput.metadata;
