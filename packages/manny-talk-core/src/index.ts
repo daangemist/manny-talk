@@ -8,6 +8,7 @@ export {
   OutgoingMessage,
   Metadata,
   ClientStart,
+  Client,
   PluginBrainSelector,
   BrainSelector,
   BrainSelectorResult,

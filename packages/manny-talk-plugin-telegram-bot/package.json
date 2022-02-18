@@ -1,0 +1,69 @@
+{
+  "name": "@manny-talk/manny-talk-plugin-telegram-bot",
+  "version": "0.1.0",
+  "description": "A genie router plugin that creates a Telegram bot to send input and receive output.",
+  "main": "build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daangemist/manny-talk.git"
+  },
+  "engines": {
+    "node": ">=16.3"
+  },
+  "keywords": [
+    "manny",
+    "manny-talk",
+    "plugin",
+    "telegram",
+    "client"
+  ],
+  "author": "daangemist",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/daangemist/manny-talk/issues"
+  },
+  "homepage": "https://github.com/daangemist/manny-talk#readme",
+  "scripts": {
+    "watch": "tsc -w",
+    "build": "tsc",
+    "test": "node tests/run.js",
+    "clean": "rimraf ./build",
+    "lint": "eslint --ext=.ts ./src",
+    "lint:fix": "eslint --ext=.ts --fix ./src",
+    "format": "prettier --check ./src",
+    "format:fix": "prettier --write ./src"
+  },
+  "mannyTalkPlugin": {
+    "name": "echo"
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "plugins": [
+      "unicorn"
+    ],
+    "rules": {
+      "unicorn/filename-case": "error"
+    },
+    "ignorePatterns": [
+      "*/**/*.js"
+    ]
+  },
+  "dependencies": {
+    "debug": "^4.3.3",
+    "messaging-api-telegram": "^1.1.0",
+    "node-telegram-bot-api": "^0.56"
+  },
+  "devDependencies": {
+    "@manny-talk/manny-talk-core": "file:../manny-talk-core",
+    "@types/debug": "^4.1.7",
+    "@typescript-eslint/eslint-plugin": "^5.2",
+    "@typescript-eslint/parser": "^5.2",
+    "eslint": "^8.1",
+    "eslint-plugin-unicorn": "^37.0",
+    "prettier": "^2.4",
+    "typescript": "^4.4"
+  }
+}

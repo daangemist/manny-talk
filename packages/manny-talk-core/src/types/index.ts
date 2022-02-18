@@ -9,6 +9,11 @@ export const isErrorWithCode = (tbd?: unknown): tbd is ErrorWithCode =>
   // @ts-expect-error When checking message is an attribute of object({}) ts does not allow to check if .message exists.
   isError(tbd) && typeof tbd.code !== 'undefined';
 
+export function isDefaultExport<T>(tbd?: unknown): tbd is { default: T } {
+  // @ts-expect-error When checking the type typescript does not allow to check if tbd has an attribute .default.
+  return typeof tbd.default !== 'undefined';
+}
+
 export type Config = {
   plugins: Record<string, PluginConfig>;
   pluginStore?: {

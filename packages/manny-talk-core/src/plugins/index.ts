@@ -18,6 +18,7 @@ import {
   isErrorWithCode,
   PluginHttp,
   LoadedPlugin,
+  isDefaultExport,
 } from '../types';
 
 const debug = Debug('manny-talk:core:plugins');
@@ -196,6 +197,11 @@ export class Loader {
         {} // We've checked earlier that the plugin has a configuration.
       );
       const plugin = this.plugins[pluginName];
+      debug(
+        'Processing %s, with attributes %s',
+        pluginName,
+        Object.keys(plugin)
+      );
 
       if (plugin.brain) {
         promises.push(
@@ -266,9 +272,15 @@ export class Loader {
         readFromObject(this.config, `plugins.${foundPlugin.name}`, {}) !==
         undefined
       ) {
-        const p = foundPlugin.getPlugin().then((pluginModule: LoadedPlugin) => {
-          this.plugins[foundPlugin.name] = pluginModule;
-        });
+        const p = foundPlugin
+          .getPlugin()
+          .then((pluginModule: LoadedPlugin | { default: LoadedPlugin }) => {
+            if (isDefaultExport(pluginModule)) {
+              this.plugins[foundPlugin.name] = pluginModule.default;
+            }
+            // We already checked whether it is a default export, its not, so it must be a LoadedPlugin
+            this.plugins[foundPlugin.name] = pluginModule as LoadedPlugin;
+          });
         promises.push(p);
       } else {
         debug(
