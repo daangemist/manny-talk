@@ -8,15 +8,14 @@ async function main() {
     defaultBrain: 'echo',
     plugins: {
       echo: {},
-      telegram: {
-        passwordRequired: false,
-        token: process.env.TOKEN,
-      },
     },
   });
 
   let inputCount = 1;
-  mannyTalk.addPlugin('telegram', telegramPlugin.default);
+  mannyTalk.addPlugin('telegram', telegramPlugin.default, {
+    passwordRequired: false,
+    token: process.env.TOKEN,
+  });
   mannyTalk.addPlugin('echo', {
     brain: {
       start: async function () {

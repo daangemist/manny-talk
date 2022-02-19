@@ -140,7 +140,7 @@ export default class BrainSelector {
       }
 
       debug(
-        'Falling back to the default brain selector',
+        'Falling back to the default brain selector: ',
         isError(err) ? err.message : err
       );
 

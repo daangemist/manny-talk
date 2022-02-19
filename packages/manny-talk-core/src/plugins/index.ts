@@ -180,8 +180,16 @@ export class Loader {
     return express;
   }
 
-  public addPlugin(name: string, plugin: LoadedPlugin) {
+  public addPlugin(
+    name: string,
+    plugin: LoadedPlugin,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    config?: Record<string, any>
+  ) {
     this.plugins[name] = plugin;
+    if (typeof config !== 'undefined') {
+      this.config.plugins[name] = config;
+    }
   }
 
   private async startFoundPlugins() {

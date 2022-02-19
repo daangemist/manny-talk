@@ -37,8 +37,13 @@ export class MannyTalk {
     );
   }
 
-  public addPlugin(name: string, plugin: LoadedPlugin): MannyTalk {
-    this.pluginLoader.addPlugin(name, plugin);
+  public addPlugin(
+    name: string,
+    plugin: LoadedPlugin,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    config?: Record<string, any>
+  ): MannyTalk {
+    this.pluginLoader.addPlugin(name, plugin, config);
     return this;
   }
 
