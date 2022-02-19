@@ -8,6 +8,9 @@ import {
 import Debug from 'debug';
 import { Config } from './types';
 import { delay } from './utils';
+import generateReplyMarkup from './reply-markup';
+
+const DEFAULT_KEYBOARD_WIDTH = 25;
 
 const debug = Debug('manny-talk:plugin:telelegram-bot');
 
@@ -17,6 +20,7 @@ let passwordRequired = false;
 let configuredPassword: string;
 let clientStart: ClientStart;
 let lastUpdate: number | undefined = undefined;
+let keyboardMaxWidth = DEFAULT_KEYBOARD_WIDTH;
 
 function getBot(): TelegramClient {
   if (!bot) {
@@ -37,27 +41,39 @@ function allowChatId(chatId: string): void {
   allowedChatIds[chatId] = true;
 }
 
-async function processTelegramTextMessage(message: TelegramTypes.Message) {
+async function processTelegramTextMessage(
+  message: TelegramTypes.Message,
+  overriddenInput?: string // for a callbackQuery, there is a message, but the text attribute of the message is not the input.
+) {
   const chatId = `${message.chat.id}`;
-  const heard = message.text ?? ''; // the captured "input"
+  const heard = overriddenInput ?? message.text ?? ''; // the captured "input"
 
   if (passwordRequired && heard === configuredPassword) {
     allowChatId(chatId);
-    getBot().sendMessage(chatId, 'Access is granted.');
+    await getBot().sendMessage(chatId, 'Access is granted.');
     return;
   }
 
   const allowed = await isChattingAllowed(chatId);
   if (!allowed) {
-    getBot().sendMessage(chatId, 'Please send me the password first.');
+    await getBot().sendMessage(chatId, 'Please send me the password first.');
     return;
   }
 
-  clientStart.heard({
+  await clientStart.heard({
     message: heard,
     profileId: `${message?.from?.id}` ?? '',
     sessionId: chatId,
   });
+  if (message.replyMarkup) {
+    // there was an inline keyboard set, remove it from the message.
+    await getBot().editMessageReplyMarkup(
+      {
+        inlineKeyboard: [],
+      },
+      { messageId: message.messageId, chatId }
+    );
+  }
 }
 
 async function speak(message: OutgoingMessage) {
@@ -65,17 +81,26 @@ async function speak(message: OutgoingMessage) {
     throw new Error('No sessionId in the message.');
   }
 
-  bot.sendMessage(message.sessionId ?? '', message.message);
+  if (!message.quickReplies) {
+    bot.sendMessage(message.sessionId ?? '', message.message);
+    return;
+  }
+
+  bot.sendMessage(message.sessionId ?? '', message.message, {
+    replyMarkup: generateReplyMarkup(keyboardMaxWidth, message.quickReplies),
+  });
 }
 
 async function startUpdateListener(): Promise<void> {
   do {
     try {
       const updates = await getBot().getUpdates({
-        allowedUpdates: ['message'],
+        allowedUpdates: ['message', 'callback_query'],
         offset: typeof lastUpdate === 'undefined' ? undefined : lastUpdate + 1,
       });
-      debug('Found %d updates.', updates.length);
+      if (updates.length > 0) {
+        debug('Found %d updates.', updates.length);
+      }
 
       // Display the information
       await Promise.all(
@@ -83,14 +108,22 @@ async function startUpdateListener(): Promise<void> {
           debug(`Incoming update %s: %o.`, update.updateId, update);
           lastUpdate = update.updateId;
 
-          if (!update.message) {
+          const message =
+            typeof update.callbackQuery?.message !== 'undefined'
+              ? update.callbackQuery.message
+              : update.message;
+          if (!message) {
             debug(
               'There was no message property in the update, skipping it. %o',
               update
             );
             return;
           }
-          return processTelegramTextMessage(update.message);
+          return processTelegramTextMessage(
+            message,
+            // If this is a call back query,
+            update.callbackQuery ? update.callbackQuery.data : undefined
+          );
         })
       );
       await delay(500);
@@ -117,6 +150,7 @@ async function start(
       allowedChatIds[chatId] = true;
     });
   }
+  keyboardMaxWidth = config.maxKeyboardWidth ?? DEFAULT_KEYBOARD_WIDTH;
   clientStart = providedClientStart;
 
   bot = new TelegramClient({

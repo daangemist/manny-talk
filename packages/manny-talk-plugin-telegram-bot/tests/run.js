@@ -15,14 +15,24 @@ async function main() {
     },
   });
 
+  let inputCount = 1;
   mannyTalk.addPlugin('telegram', telegramPlugin.default);
   mannyTalk.addPlugin('echo', {
     brain: {
       start: async function () {
         return {
           process: async function (input) {
+            inputCount += 1;
             return {
               message: input.message,
+              quickReplies:
+                inputCount % 2 // only every one in 2 messages has quick replies
+                  ? [
+                      { label: 'Option A', speak: 'A' },
+                      { label: 'Option B', speak: 'B' },
+                      { label: 'Option C', speak: 'C' },
+                    ]
+                  : undefined,
             };
           },
         };

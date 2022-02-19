@@ -107,6 +107,12 @@ export type OutgoingMessage = {
   metadata?: Metadata;
   sessionId?: string;
   profileId?: string;
+  quickReplies?: QuickReply[];
+};
+
+export type QuickReply = {
+  label?: string;
+  speak: string;
 };
 
 export interface OutgoingMessageCore extends OutgoingMessage {
