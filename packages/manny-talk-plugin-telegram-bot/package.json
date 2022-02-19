@@ -34,7 +34,7 @@
     "format:fix": "prettier --write ./src"
   },
   "mannyTalkPlugin": {
-    "name": "echo"
+    "name": "telegram"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
