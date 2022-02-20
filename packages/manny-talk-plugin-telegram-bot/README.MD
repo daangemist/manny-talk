@@ -113,3 +113,7 @@ This will start up `npm run watch` for the `manny-talk-core` package. Open a sec
 Contributions are welcome. This does not necessarily have to be code, it can also be updated documentation, tutorials, bug reports or pull requests.
 
 Please create an [Issue](https://github.com/daangemist/manny-talk/issues/new/choose) to propose a feature you want to implement, so that the details can be discussed in advance.
+
+# Open Items / Todo
+
+- Implement telegram webhook for messages (once manny-talk-core supports http/express).

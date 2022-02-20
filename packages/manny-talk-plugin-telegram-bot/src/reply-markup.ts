@@ -1,4 +1,4 @@
-import { QuickReply } from '@manny-talk/manny-talk/build/types';
+import { QuickReply } from '@manny-talk/manny-talk';
 import { TelegramTypes } from 'messaging-api-telegram';
 
 const MAX_HORIZONTAL = 5;
