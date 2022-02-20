@@ -1,7 +1,6 @@
 import Debug from 'debug';
 import {
   Brain,
-  IncomingMessage,
   BrainSelector as BrainSelectorType,
   isError,
   BrainSelectorResult,
@@ -149,7 +148,7 @@ export default class BrainSelector {
   }
 
   private async getDefaultSelectorResult(
-    input: IncomingMessage
+    input: IncomingMessageCore
   ): Promise<BrainSelectorResult> {
     const result = await this.defaultSelector(this.brains, input);
     if (result === false) {

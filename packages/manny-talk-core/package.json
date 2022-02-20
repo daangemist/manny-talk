@@ -23,7 +23,11 @@
     "router",
     "conversation",
     "commands",
-    "hub"
+    "hub",
+    "superplug",
+    "chat",
+    "chatbot",
+    "messaging"
   ],
   "author": "daangemist",
   "license": "MIT",

@@ -1,6 +1,5 @@
 import Debug from 'debug';
 import EventEmitter from 'events';
-import { readFromObject } from './utils';
 import http from './http';
 import BrainSelector from './brain-selector';
 import { Loader as PluginLoader } from './plugins';
@@ -26,7 +25,7 @@ export class MannyTalk {
     this.httpEnabled = false;
     this.brainSelector = new BrainSelector(
       config.defaultBrain,
-      readFromObject<number>(config, 'brainStickiness', 120)
+      config.brainStickiness ?? 120
     );
     this.eventEmitter = new EventEmitter();
     this.pluginLoader = new PluginLoader(
@@ -117,11 +116,7 @@ export class MannyTalk {
    * Start the HTTP Api, if enabled.
    */
   private async startHttp(): Promise<void> {
-    this.httpEnabled = readFromObject<boolean>(
-      this.config,
-      'http.enabled',
-      false
-    );
+    this.httpEnabled = this.config?.http?.enabled ?? false;
     if (!this.httpEnabled) {
       return;
     }

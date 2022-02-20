@@ -8,7 +8,6 @@ import { stat, mkdir, writeFile } from 'fs/promises';
 // @ts-expect-error npm-utils has no @types/npm-utils
 import npmUtils from 'npm-utils';
 import http from '../http';
-import { readFromObject } from '../utils';
 import BrainSelector from '../brain-selector';
 import {
   Brain,
@@ -80,11 +79,8 @@ export class Loader {
    * @return Promise
    */
   private async getPluginStoreLocation(): Promise<string> {
-    const configuredPath = readFromObject(
-      this.config,
-      'pluginStore.location',
-      false
-    );
+    const configuredPath = this.config?.pluginStore?.location;
+
     if (configuredPath) {
       debug('Found configured path', configuredPath);
       await this.checkConfiguredPath(configuredPath);
@@ -199,11 +195,7 @@ export class Loader {
     const brains: Record<string, Brain> = {};
 
     plugins.forEach((pluginName) => {
-      const pluginConfig = readFromObject(
-        this.config,
-        `plugins.${pluginName}`,
-        {} // We've checked earlier that the plugin has a configuration.
-      );
+      const pluginConfig = this.config.plugins[pluginName]; // We've checked earlier that it exists.
       const plugin = this.plugins[pluginName];
       debug(
         'Processing %s, with attributes %s',
@@ -276,10 +268,7 @@ export class Loader {
 
     foundPlugins.forEach(async (foundPlugin) => {
       // Only load the plugins which have a configuration
-      if (
-        readFromObject(this.config, `plugins.${foundPlugin.name}`, {}) !==
-        undefined
-      ) {
+      if (typeof this.config.plugins[foundPlugin.name] !== 'undefined') {
         const p = foundPlugin
           .getPlugin()
           .then((pluginModule: LoadedPlugin | { default: LoadedPlugin }) => {

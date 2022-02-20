@@ -70,7 +70,7 @@ export type PluginBrainSelector = {
 
 export type BrainSelector = (
   brains: Record<string, Brain>,
-  input: IncomingMessage
+  input: IncomingMessageCore
 ) => Promise<BrainSelectorResult | false>;
 
 export type BrainSelectorResult = {

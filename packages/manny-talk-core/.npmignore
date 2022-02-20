@@ -1,0 +1,7 @@
+src
+tsconfig.json
+.editorconfig
+tests
+config.json
+config.json.dist
+jest.config.js
