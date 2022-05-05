@@ -1,8 +1,0 @@
-version: 1
-update_configs:
-  - package_manager: 'javascript'
-    directory: '/packages/manny-talk-core'
-    update_schedule: 'daily'
-  - package_manager: 'javascript'
-    directory: '/packages/manny-talk-plugin-telegram-bot'
-    update_schedule: 'daily'
