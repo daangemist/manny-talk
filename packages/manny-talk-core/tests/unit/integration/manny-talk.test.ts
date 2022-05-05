@@ -18,7 +18,7 @@ const config: Config = {
 describe('Manny Talk', () => {
   it('triggers both brain and reply for input.', async () => {
     const brainMock = { process: jest.fn() };
-    brainMock.process.mockResolvedValue({ message: 'Great work!' });
+    brainMock.process.mockResolvedValue({ messages: ['Great work!'] });
     const speak = jest.fn();
 
     const mannyTalk = new MannyTalk(config);
@@ -45,7 +45,8 @@ describe('Manny Talk', () => {
     });
     await mannyTalk.start();
 
-    // @ts-expect-error we know its defined.
+    expect(heardFn).toBeDefined();
+    // @ts-ignore We know that it is defined.
     await heardFn({ message: 'Hi there' });
     expect(brainMock.process).toBeCalled();
     expect(speak).toBeCalled();

@@ -1,4 +1,4 @@
-import { MannyTalk } from '@manny-talk/manny-talk-core';
+import { MannyTalk } from '@manny-talk/manny-talk';
 import echoPlugin from '../../build';
 
 async function delay(delay: number): Promise<void> {
@@ -32,7 +32,7 @@ describe('echo', () => {
     await delay(15);
     expect(speak).toBeCalled();
     expect(speak).toBeCalledWith(
-      expect.objectContaining({ message: 'ECHO Echo test' })
+      expect.objectContaining({ messages: ['ECHO Echo test'] })
     );
   });
 });

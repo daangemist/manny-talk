@@ -5,7 +5,7 @@ import {
 } from '@manny-talk/manny-talk';
 
 async function process(message: IncomingMessage): Promise<OutgoingMessage> {
-  return { message: `ECHO ${message.message}` };
+  return { messages: [`ECHO ${message.message}`] };
 }
 
 async function start() {

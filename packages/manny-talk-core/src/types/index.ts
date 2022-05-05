@@ -103,7 +103,7 @@ export interface IncomingMessageCore extends IncomingMessage {
 }
 
 export type OutgoingMessage = {
-  message: string;
+  messages: string[];
   metadata?: Metadata;
   sessionId?: string;
   profileId?: string;

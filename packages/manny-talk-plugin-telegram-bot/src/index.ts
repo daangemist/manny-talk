@@ -82,13 +82,27 @@ async function speak(message: OutgoingMessage) {
   }
 
   if (!message.quickReplies) {
-    bot.sendMessage(message.sessionId ?? '', message.message);
+    for (let iter = message.messages.length - 1; iter >= 0; iter--) {
+      await bot.sendMessage(message.sessionId ?? '', message.messages[iter]);
+    }
     return;
   }
 
-  bot.sendMessage(message.sessionId ?? '', message.message, {
-    replyMarkup: generateReplyMarkup(keyboardMaxWidth, message.quickReplies),
-  });
+  for (let iter = message.messages.length - 1; iter >= 0; iter--) {
+    const textMessage = message.messages[iter];
+    await bot.sendMessage(
+      message.sessionId ?? '',
+      textMessage,
+      iter === message.messages.length - 1
+        ? {
+            replyMarkup: generateReplyMarkup(
+              keyboardMaxWidth,
+              message.quickReplies
+            ),
+          }
+        : {}
+    );
+  }
 }
 
 async function startUpdateListener(): Promise<void> {

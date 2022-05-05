@@ -52,7 +52,7 @@
     ]
   },
   "devDependencies": {
-    "@manny-talk/manny-talk-core": "file:../manny-talk-core",
+    "@manny-talk/manny-talk-core": "@manny-talk/manny-talk",
     "@tsconfig/node14": "^1.0",
     "@typescript-eslint/eslint-plugin": "^5.2",
     "@typescript-eslint/parser": "^5.2",

@@ -106,7 +106,7 @@ export class MannyTalk {
     } catch (err) {
       debug('Unable to process input %s: %s', JSON.stringify(input), `${err}`);
       return {
-        message: 'Could not process input. Try again.',
+        messages: ['Could not process input. Try again.'],
         plugin: 'manny-talk-core',
       };
     }

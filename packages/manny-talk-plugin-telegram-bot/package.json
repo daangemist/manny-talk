@@ -1,6 +1,6 @@
 {
-  "name": "@manny-talk/manny-talk-plugin-telegram-bot",
-  "version": "0.1.0",
+  "name": "@manny-talk/plugin-telegram-bot",
+  "version": "0.2.0",
   "description": "A genie router plugin that creates a Telegram bot to send input and receive output.",
   "main": "build/index.js",
   "repository": {
@@ -53,11 +53,10 @@
   },
   "dependencies": {
     "debug": "^4.3.3",
-    "messaging-api-telegram": "^1.1.0",
-    "node-telegram-bot-api": "^0.56"
+    "messaging-api-telegram": "^1.1.0"
   },
   "devDependencies": {
-    "@manny-talk/manny-talk-core": "file:../manny-talk-core",
+    "@manny-talk/manny-talk": "^0.2.0",
     "@types/debug": "^4.1.7",
     "@types/node": "^17.0.18",
     "@typescript-eslint/eslint-plugin": "^5.2",

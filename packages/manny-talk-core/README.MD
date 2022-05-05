@@ -40,7 +40,7 @@ mannyTalk.addPlugin('echo', {
       return {
         process: async function (input) {
           return {
-            message: input.message,
+            messages: [input.message],
           };
         },
       };
