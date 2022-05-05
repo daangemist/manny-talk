@@ -16,7 +16,8 @@ export default function generateReplyMarkup(
     // Check if we have an existing row, where this reply will be too big for
     const closeRow =
       (charactersInRow > 0 &&
-        quickReply.label.length + charactersInRow > maxCharacterWidth) ||
+        (quickReply.label ?? quickReply.speak).length + charactersInRow >
+          maxCharacterWidth) ||
       row.length >= MAX_HORIZONTAL;
 
     if (closeRow) {
@@ -25,8 +26,11 @@ export default function generateReplyMarkup(
       charactersInRow = 0;
     }
 
-    row.push({ text: quickReply.label, callbackData: quickReply.speak });
-    charactersInRow += quickReply.label.length;
+    row.push({
+      text: quickReply.label ?? quickReply.speak,
+      callbackData: quickReply.speak,
+    });
+    charactersInRow += (quickReply.label ?? quickReply.speak).length;
   });
 
   if (row.length > 0) {

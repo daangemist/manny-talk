@@ -12,10 +12,12 @@ export {
   ClientStart,
   Client,
   PluginBrainSelector,
+  Brain,
   BrainSelector,
   BrainSelectorResult,
   PluginListener,
   LoadedPlugin,
+  QuickReply,
 } from './types';
 
 export { events } from './constants';

@@ -1,4 +1,4 @@
-const { MannyTalk } = require('@manny-talk/manny-talk-core');
+const { MannyTalk } = require('@manny-talk/manny-talk');
 const telegramPlugin = require(`${__dirname}/../build`);
 
 console.log('telegramPlugin', telegramPlugin);
@@ -23,7 +23,7 @@ async function main() {
           process: async function (input) {
             inputCount += 1;
             return {
-              message: input.message,
+              messages: [input.message],
               quickReplies:
                 inputCount % 2 // only every one in 2 messages has quick replies
                   ? [
