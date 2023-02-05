@@ -9,10 +9,12 @@ updates:
     directory: '/packages/manny-talk-core' # Location of package manifests
     schedule:
       interval: 'weekly'
-    dependency-type: production
+    allow:
+      - dependency-type: production
 
   - package-ecosystem: 'npm'
     directory: '/packages/manny-talk-plugin-telegram-bot'
     schedule:
       interval: 'weekly'
-    dependency-type: production
+    allow:
+      - dependency-type: production
