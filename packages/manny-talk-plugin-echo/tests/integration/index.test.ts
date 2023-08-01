@@ -1,5 +1,5 @@
 import { MannyTalk } from '@manny-talk/manny-talk';
-import echoPlugin from '../../build';
+import echoPlugin from '../..';
 
 async function delay(delay: number): Promise<void> {
   return new Promise((resolve) => {

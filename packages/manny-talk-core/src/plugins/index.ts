@@ -5,10 +5,9 @@ import os from 'os';
 import { EventEmitter } from 'events';
 import { Express } from 'express'; // Only import the type, express is imported async.
 import { stat, mkdir, writeFile } from 'fs/promises';
-// @ts-expect-error npm-utils has no @types/npm-utils
-import npmUtils from 'npm-utils';
 import http from '../http';
 import BrainSelector from '../brain-selector';
+import { exec } from 'node:child_process';
 import {
   Brain,
   Client,
@@ -299,9 +298,15 @@ export class Loader {
     debug('Changing npm install folder to %s', this.location);
     process.chdir(this.location);
     debug('Installing modules.');
-    await npmUtils.install({
-      name: '',
-      flags: ['--quiet', '--production'],
+
+    await new Promise<void>((resolve, reject) => {
+      exec('npm install --quiet --omit=dev', (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
     });
 
     // move back to the old current dir

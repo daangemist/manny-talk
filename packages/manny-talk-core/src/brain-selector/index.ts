@@ -20,6 +20,7 @@ const debug = Debug('manny-talk:core:brainSelector');
 export default class BrainSelector {
   private defaultSelector: BrainSelectorType;
   private selectors: Record<string, BrainSelectorType>;
+  private selectorsHaveBeenAdded = false;
   private lastSelectedBrainsPerClient: Record<
     string,
     { time: Date; brain: Brain }
@@ -48,6 +49,7 @@ export default class BrainSelector {
     }
     debug('Adding selector %s in use()', label);
     this.selectors[label] = selector;
+    this.selectorsHaveBeenAdded = true;
   }
 
   /**
@@ -66,7 +68,7 @@ export default class BrainSelector {
   async getBrainForInput(
     input: IncomingMessageCore
   ): Promise<BrainSelectorResult> {
-    if (this.selectors === {}) {
+    if (!this.selectorsHaveBeenAdded) {
       return this.getDefaultSelectorResult(input);
     }
 

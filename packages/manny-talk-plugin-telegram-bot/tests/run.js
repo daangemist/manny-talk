@@ -1,8 +1,6 @@
 const { MannyTalk } = require('@manny-talk/manny-talk');
 const telegramPlugin = require(`${__dirname}/../build`);
 
-console.log('telegramPlugin', telegramPlugin);
-
 async function main() {
   const mannyTalk = new MannyTalk({
     defaultBrain: 'echo',
