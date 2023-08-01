@@ -45,7 +45,9 @@
     "lint": "eslint --ext=.ts ./src",
     "lint:fix": "eslint --ext=.ts --fix ./src",
     "format": "prettier --check ./src",
-    "format:fix": "prettier --write ./src"
+    "format:fix": "prettier --write ./src",
+    "audit": "npm audit --omit=dev",
+    "audit:fix": "npm audit fix"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
@@ -83,7 +85,6 @@
     "express": "^4.17"
   },
   "dependencies": {
-    "npm-utils": "^2.0.3",
     "superplug": "^1.0.0",
     "yargs": "^17.3.1"
   }

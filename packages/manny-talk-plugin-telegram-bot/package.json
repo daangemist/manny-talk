@@ -26,12 +26,14 @@
   "scripts": {
     "watch": "tsc -w",
     "build": "tsc",
-    "test": "node tests/run.js",
+    "test:integration": "node tests/run.js",
     "clean": "rimraf ./build",
     "lint": "eslint --ext=.ts ./src",
     "lint:fix": "eslint --ext=.ts --fix ./src",
     "format": "prettier --check ./src",
-    "format:fix": "prettier --write ./src"
+    "format:fix": "prettier --write ./src",
+    "audit": "npm audit --omit=dev",
+    "audit:fix": "npm audit fix"
   },
   "mannyTalkPlugin": {
     "name": "telegram"

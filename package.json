@@ -1,6 +1,18 @@
 {
   "name": "manny-talk",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "nx run-many --target=build",
+    "audit": "nx run-many --target=audit",
+    "audit:fix": "nx run-many --target=audit:fix",
+    "lint": "nx run-many --target=lint",
+    "clean": "nx run-many --target=clean",
+    "test": "nx run-many --target=test"
+  },
   "devDependencies": {
-    "@types/jest": "^27.4.0"
+    "@types/jest": "^27.4.0",
+    "nx": "16.6.0"
   }
 }
